@@ -27,6 +27,7 @@ export default function RegistrationForm(){
             last_name: form.last_name,
             bio: form.bio, 
         };
+        console.log("Going not in ", process.env.NEXT_PUBLIC_API_URL + "/api/auth/register for authentication")
         axios.post(process.env.NEXT_PUBLIC_API_URL + "/api/auth/register/", data)
         .then((res) => {
             // Registering the account and tokens in the store 
