@@ -1,0 +1,83 @@
+import { useState, useContext } from "react";
+import { Button, Form } from "react-bootstrap";
+import axiosService from "@/helpers/axios";
+import useUserActions from "@/hooks/user.actions";
+import { FaUser } from "react-icons/fa";
+
+export default function CreateComment(props){
+    const { postId, refresh } = props; 
+    const [validated, setValidated ] = useState(false);
+    const [form, setForm] = useState({ body: ""});
+    const {  setToaster } = useContext(Context);
+    const { getUser } = useUserActions();
+    const user = getUser();
+
+    const handleSubmit = (event) => {
+        // Logic to handle Form submission 
+        event.preventDefault();
+        const createCommentForm = event.currentTarget; 
+
+        if (createCommentForm.checkValidity() === false){
+            event.stopPropagation();
+        }
+        setValidated(true);
+
+        const data = {
+            author: user.id, 
+            body: form.body, 
+            post: postId,
+        };
+        axiosService 
+            .post(`/post/${postId}/comment/`, data)
+            .then(() => {
+                setForm({ ...form, body: ""});
+                setToaster({
+                    type: "success",
+                    message: "Comment Post Successfully 🚀",
+                    show: true, 
+                    title: "Comment!",
+                });
+                refresh();
+            })
+            .catch(() => {
+                setToaster({
+                    type: "danger",
+                    message: "", 
+                    show: true, 
+                    title: "An error occurred.!"
+                });
+            });
+    };
+
+    return (
+        <Form
+            className="d-flex flex-row justify-content-between"
+            noValidate 
+            validated={validated}
+            onSubmit={handleSubmit}
+        >
+            <FaUser/>
+            <Form.Group className="m-3 w-75">
+                <Form.Control
+                    className="py-2 rounded-pill border-primary"
+                    type="text"
+                    placeholder="Write A comment"
+                    value={form.body}
+                    name="body"
+                    onChange={(e) => setForm({ ...form, body: e.target.value})}
+                />
+            </Form.Group>
+            <div className="m-auto">
+                <Button 
+                    variant="primary"
+                    onClick={handleSubmit}
+                    disabled={form.body === undefined}
+                    size="small"
+                >
+                    Comment
+                </Button>
+            </div>
+            
+        </Form>
+    );
+}
